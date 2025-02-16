@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #ffebcd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 48px;
+        color: #ffffff;
+        margin-bottom: 20px;
+        background-color: #ff6347;
+        padding: 10px 30px;
+        border-radius: 10px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        grid-template-rows: repeat(3, 100px);
+        gap: 10px;
+        margin-top: 20px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .cell {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 36px;
+        font-weight: bold;
+        background-color: #fff;
+        border: 3px solid #ff6347;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background-color 0.3s, transform 0.2s ease-in-out;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .cell:hover {
+        background-color: #f0f0f0;
+        transform: scale(1.05);
+      }
+
+      .cell.taken {
+        pointer-events: none;
+      }
+
+      .status {
+        font-size: 22px;
+        margin-top: 20px;
+        color: #333;
+        font-weight: bold;
+      }
+
+      .reset {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        background-color: #32cd32;
+        color: white;
+        font-size: 18px;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        width: 180px;
+      }
+
+      .reset:hover {
+        background-color: #28a745;
+      }
+
+      .status {
+        color: #333;
+        font-weight: bold;
+        font-size: 24px;
+      }
+
+      .winner {
+        color: #ff6347;
+        font-size: 28px;
+      }
+
+      .draw {
+        color: #ff8c00;
+        font-size: 28px;
+      }
+
+      .x {
+        color: #4a90e2;
+      }
+
+      .o {
+        color: #e91e63;
+      }
+
+      .winning-cell {
+        background-color: #ff6347 !important;
+        color: white !important;
+        animation: winningAnimation 1s ease-in-out infinite alternate;
+      }
+
+      @keyframes winningAnimation {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tic Tac Toe</h1>
+    <div class="board" id="board">
+      <div class="cell" id="cell-0"></div>
+      <div class="cell" id="cell-1"></div>
+      <div class="cell" id="cell-2"></div>
+      <div class="cell" id="cell-3"></div>
+      <div class="cell" id="cell-4"></div>
+      <div class="cell" id="cell-5"></div>
+      <div class="cell" id="cell-6"></div>
+      <div class="cell" id="cell-7"></div>
+      <div class="cell" id="cell-8"></div>
+    </div>
+    <div class="status" id="status"></div>
+    <button class="reset" id="resetBtn">Restart Game</button>
+
+    <script>
+      const cells = document.querySelectorAll(".cell");
+      const statusDiv = document.querySelector("#status");
+      const resetButton = document.querySelector("#resetBtn");
+
+      let currentPlayer = "X";
+      let gameBoard = ["", "", "", "", "", "", "", "", ""];
+      let gameActive = true;
+
+      function checkWinner() {
+        const winningCombinations = [
+          [0, 1, 2],
+          [3, 4, 5],
+          [6, 7, 8],
+          [0, 3, 6],
+          [1, 4, 7],
+          [2, 5, 8],
+          [0, 4, 8],
+          [2, 4, 6],
+        ];
+
+        for (let combination of winningCombinations) {
+          const [a, b, c] = combination;
+          if (
+            gameBoard[a] &&
+            gameBoard[a] === gameBoard[b] &&
+            gameBoard[a] === gameBoard[c]
+          ) {
+            return combination;
+          }
+        }
+
+        return null;
+      }
+
+      function handleCellClick(index) {
+        if (gameBoard[index] === "" && gameActive) {
+          gameBoard[index] = currentPlayer;
+          cells[index].innerText = currentPlayer;
+          cells[index].classList.add("taken");
+
+          if (currentPlayer === "X") {
+            cells[index].classList.add("x");
+          } else {
+            cells[index].classList.add("o");
+          }
+
+          const winnerCombination = checkWinner();
+
+          if (winnerCombination) {
+            gameActive = false;
+            winnerCombination.forEach(index => {
+              cells[index].classList.add("winning-cell");
+            });
+            statusDiv.innerHTML = `<span class="winner">${currentPlayer} Wins!</span>`;
+          } else if (gameBoard.every((cell) => cell !== "")) {
+            gameActive = false;
+            statusDiv.innerHTML = `<span class="draw">It's a Draw!</span>`;
+          } else {
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            statusDiv.innerText = `Player ${currentPlayer}'s turn`;
+          }
+        }
+      }
+
+      function initializeGame() {
+        currentPlayer = "X";
+        gameBoard = ["", "", "", "", "", "", "", "", ""];
+        gameActive = true;
+        statusDiv.innerText = `Player ${currentPlayer}'s turn`;
+
+        cells.forEach((cell, index) => {
+          cell.innerText = "";
+          cell.classList.remove("taken", "x", "o", "winning-cell");
+          cell.addEventListener("click", () => handleCellClick(index), {
+            once: true,
+          });
+        });
+      }
+
+      resetButton.addEventListener("click", initializeGame);
+
+      initializeGame();
+    </script>
+  </body>
+</html>
